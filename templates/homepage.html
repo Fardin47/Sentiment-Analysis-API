@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sentiment Analysis</title>
+    {% load static %}
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'styles/homepage.css' %}"
+    />
+  </head>
+  <body
+    background="{% static 'images/emoji.jpg' %}"
+    style="background-repeat: no-repeat; background-size: cover"
+  >
+    <div class="container">
+      <h1>Sentiment Analysis</h1>
+
+      <form id="sentiment-form">
+        {% csrf_token %}
+        <label class="label_txt" for="input-text">Input Text:</label>
+        <input
+          class="input_text"
+          type="text"
+          id="input-text"
+          name="text"
+          required
+        />
+        <button class="btn-submit" type="submit">Analyze</button>
+      </form>
+
+      <div id="result-container" style="display: none">
+        <h2>Sentiment Analysis Result</h2>
+        <p id="written-text"></p>
+        <p id="sentiment-result"></p>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("sentiment-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Getting the input text
+          const inputText = document.getElementById("input-text").value;
+
+          // Send a POST request to the analyze API
+          fetch("api/v1/analyze/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json", // indicating that the request body contains JSON data
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({ text: inputText }), // converting the input text to a JSON string
+          })
+            .then(function (response) {
+              return response.json(); //returning the response as Json
+            })
+            .then(function (data) {
+              //calling the function with the parsed json data
+              // Display the sentiment result
+              document.getElementById("sentiment-result").textContent =
+                "Sentiment: " + data.sentiment;
+
+              // Displaying the Input text
+              document.getElementById("written-text").textContent =
+                "Input Text: " + inputText;
+
+              // Showing the result
+              document.getElementById("result-container").style.display =
+                "block";
+
+              // Clearing the input field after submission
+              document.getElementById("input-text").value = "";
+            });
+        });
+    </script>
+  </body>
+</html>
